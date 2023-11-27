@@ -46,7 +46,6 @@ def prikazi_tablu(tabla, n):
 
     for i in range(n):
         for j in range(3):
-            # Oznake za redove
             if j == 1:
                 print(chr(65 + i), end=' ')
             else:
@@ -70,13 +69,88 @@ def inicijalno_stanje(tabla, n):
                 tabla[i][j][2][0] = 'X'
 
 
+def unos_poteza():
+    print("Unesite red steka")
+    red = input()
+    print("Unesite kolonu steka")
+    kolona = int(input())
+    print("Unesite poziciju u steku")
+    poz = int(input())
+    print("Unesite smer kretanja(GL, GD, DL, DD)")
+    smer = input()
+
+    return [red, kolona, poz, smer]
+
+def izaberi_prvog():
+    print("Izaberi ko prvi igra(covek - 1, racunar - 2)")
+    prvi = int(input())
+    if(prvi != 1 and prvi != 2):
+        raise Exception("Pogresan unos")
+    return prvi
+    
+    
+    
+def odigraj(tabla, potez, igrac):
+    red = ord(potez[0]) - 65
+    kolona = int(potez[1]) - 1
+    pozicija =  potez[2]
+
+    r = int(pozicija // 3)
+    c = int(pozicija % 3)
+    c_copy = c
+    if(pozicija in [6,7,8]):
+        r = r - 2
+    elif(pozicija in [0,1,2]):
+        r = r + 2
+
+    #. . . 
+    #X . . 
+    #X O X
+    #[O X X X]
+    polje = tabla[red][kolona]
+    stek = []
+
+    nadjen = False 
+    for i in range(r,-1,-1):
+        for j in range(3):
+            e = c_copy % 3
+            if(polje[i][e] != '.'):
+                stek.append(polje[i][e])
+            else:
+                nadjen = True
+                break
+            c_copy = c_copy + 1
+            if e == 2:
+                break
+        if nadjen:
+            break
+
+    print(stek)
+    # if potez[3] == 'GL':
+        
+    # elif potez[3] == 'GD':
+
+    # elif potez[3] == 'DL':
+    
+    # elif potez[3] == 'GD':
+
 if __name__ == "__main__":
     print("Unesite velicinu tabele (8-16)")
     n = int(input())
 
+    prvi = izaberi_prvog()
+
     tabla = kreirajTablu(n)
     inicijalno_stanje(tabla, n)
+    tabla[1][1][2][1] = 'O'
+    tabla[1][1][2][2] = 'X'
+    tabla[1][1][1][0] = 'X'
     prikazi_tablu(tabla, n)
+
+    potez = unos_poteza()
+    odigraj(tabla,potez, 1)
+    
+
 
 
 
