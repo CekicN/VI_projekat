@@ -1,5 +1,8 @@
 from Igrac import Igrac
 
+igrac1 = Igrac('X')
+igrac2 = Igrac('O')
+
 def kreirajTablu(n):
     if(n % 2 != 0 or n > 16 or n < 8):
         raise Exception("Lose uneta vrednost")
@@ -103,7 +106,7 @@ def pozicija(pozicija):
         r = r + 2
     return (r, c)
 
-def odigraj(tabla, n, potez, igrac):
+def odigraj(tabla, n, potez, igrac:Igrac):
     red = ord(potez[0]) - 65
     kolona = int(potez[1]) - 1
     poz =  potez[2]
@@ -116,13 +119,14 @@ def odigraj(tabla, n, potez, igrac):
     polje = tabla[red][kolona]
     stek = []
 
-    if(postoji_u_steku(tabla, red, kolona,poz)):
+    if(postoji_u_steku(tabla, red, kolona,poz) and tabla[red][kolona][r][c] == igrac.naziv):
         nadjen = False 
         for i in range(r,-1,-1):
             for j in range(3):
                 e = c_copy % 3
                 if(polje[i][e] != '.'):
                     stek.append(polje[i][e])
+                    polje[i][e] = '.'
                 else:
                     nadjen = True
                     break
@@ -161,7 +165,7 @@ def vrhSteka(red, kolona):
 def igraj(tabla, n, stek, red, kolona, vrh1):
     vrh = vrhSteka(red, kolona)
     po = pozicija(vrh)
-    if postoji_polje(n,red, kolona) and (len(stek) + vrh) < 8 and (vrh + len(stek)) > vrh1: 
+    if postoji_polje(n,red, kolona) and (len(stek) + vrh) <= 8 and (vrh + len(stek)) > vrh1: 
         c_copy = po[1]
         k = 0
         for i in range(po[0],-1,-1):
@@ -178,6 +182,20 @@ def igraj(tabla, n, stek, red, kolona, vrh1):
                     break
             if k > len(stek) - 1:
                     break
+        if tabla[red][kolona][0][1] == 'X':
+            igrac1.poeni += 1
+            for i in range(3):
+                for j in range(3):
+                    tabla[red][kolona][i][j] = '.'
+                
+        elif tabla[red][kolona][0][1] == 'O':
+            igrac2.poeni += 1
+            for i in range(3):
+                for j in range(3):
+                    tabla[red][kolona][i][j] = '.'
+            
+         
+                    
     else:
         print("Vise od 8 figura u rezultujucem steku")
 def prazna_susedna(tabla, red, kolona):
@@ -226,33 +244,41 @@ def prekini(n, igrac1:Igrac, igrac2: Igrac):
         return True
     return False
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     print("Unesite velicinu tabele (8-16)")
     n = int(input())
 
     prvi = izaberi_prvog()
 
-    igrac1 = Igrac('X')
-    igrac2 = Igrac('O')
+    # igrac1 = Igrac('X')
+    # igrac2 = Igrac('O')
 
     tabla = kreirajTablu(n)
     inicijalno_stanje(tabla, n)
-    tabla[1][1][2][1] = 'X'
-    tabla[1][1][2][2] = 'O'
-    tabla[1][1][1][0] = 'X'
-    tabla[0][0][2][0] = 'X'
-    tabla[0][0][2][1] = 'O'
-    tabla[0][0][2][2] = 'X'
-    tabla[0][0][1][0] = 'O'
+    # tabla[1][1][2][1] = 'X'
+    # tabla[1][1][2][2] = 'O'
+    # tabla[1][1][1][0] = 'X'
+    # tabla[0][0][2][0] = 'X'
+    # tabla[0][0][2][1] = 'O'
+    # tabla[0][0][2][2] = 'X'
+    # tabla[0][0][1][0] = 'O'
     prikazi_tablu(tabla, n)
-    print(igrac1, igrac2)
-
-    potez = unos_poteza()
-    odigraj(tabla, n,potez, 1)
-    prikazi_tablu(tabla, n)
-
     
-
-
-
-
+    i = 0
+    while(not(prazna_tabla(tabla,n)) or not(prekini(n,igrac1,igrac2))):
+        
+        if(i % 2 == 0):
+            igrac = igrac1
+            
+        else:
+            igrac = igrac2
+        i = i + 1
+        print(f"Igra: {igrac.naziv}")
+        potez = unos_poteza()
+        odigraj(tabla, n,potez, igrac)
+        prikazi_tablu(tabla, n)
+        print(igrac1, igrac2)
+    if(igrac1.poeni>igrac2.poeni):
+        print(f"Pobedio je ${igrac1.naziv} sa ${igrac1.poeni} poena")
+    else:
+        print(f"Pobedio je ${igrac2.naziv} sa ${igrac2.poeni} poena")
