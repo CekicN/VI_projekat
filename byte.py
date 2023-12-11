@@ -79,6 +79,9 @@ def unos_poteza():
     poz = int(input())
     print("Unesite smer kretanja(GL, GD, DL, DD)")
     smer = input()
+    while(not proveri_smer(smer)):
+        print("Pogresno unet potez, unesi ponovo:")
+        smer = input()
 
     return [red, kolona, poz, smer]
 
@@ -93,7 +96,7 @@ def izaberi_prvog():
 def pozicija(pozicija):
     r = int(pozicija // 3)
     c = int(pozicija % 3)
-    c_copy = c
+    
     if(pozicija in [6,7,8]):
         r = r - 2
     elif(pozicija in [0,1,2]):
@@ -109,10 +112,6 @@ def odigraj(tabla, n, potez, igrac):
     r = p[0]
     c = p[1]
     c_copy = c
-    #. . . 
-    #X . . 
-    #X O X
-    #[O X X X]
 
     polje = tabla[red][kolona]
     stek = []
@@ -124,7 +123,6 @@ def odigraj(tabla, n, potez, igrac):
                 e = c_copy % 3
                 if(polje[i][e] != '.'):
                     stek.append(polje[i][e])
-                    polje[i][e] = '.'
                 else:
                     nadjen = True
                     break
@@ -132,20 +130,60 @@ def odigraj(tabla, n, potez, igrac):
                 if e == 2:
                     break
             if nadjen:
-                break
+                break          
+        vrh = vrhSteka(red, kolona)
+        if potez[3] == 'GL':
+            igraj(tabla,n, stek, red - 1, kolona - 1, vrh)
+        elif potez[3] == 'GD':
+            igraj(tabla, n, stek, red - 1, kolona + 1, vrh)
+        elif potez[3] == 'DL':
+            igraj(tabla, n, stek, red + 1, kolona - 1, vrh)
+        elif potez[3] == 'DD':
+            igraj(tabla, n, stek, red + 1, kolona + 1, vrh)
 
-    print(stek)
+def vrhSteka(red, kolona):
+    c_copy = 0
+    poz = 0
+    for i in range(2,-1,-1):
+            for j in range(3):
+                e = c_copy % 3
 
-    print(postoje_figure(tabla, red, kolona))
-    # if potez[3] == 'GL':
+                if(tabla[red][kolona][i][e] == '.'):
+                    break
+                else:
+                    poz = poz + 1
+                c_copy = c_copy + 1
+                if e == 2:
+                    break
+            if(tabla[red][kolona][i][e] == '.'):
+                    break
+    return poz
+def igraj(tabla, n, stek, red, kolona, vrh1):
+    vrh = vrhSteka(red, kolona)
+    po = pozicija(vrh)
+    if postoji_polje(n,red, kolona) and (len(stek) + vrh) < 8 and (vrh + len(stek)) > vrh1: 
+        c_copy = po[1]
+        k = 0
+        for i in range(po[0],-1,-1):
+            for j in range(3):
+                e = c_copy % 3
 
-    # elif potez[3] == 'GD':
-
-    # elif potez[3] == 'DL':
-    
-    # elif potez[3] == 'GD':
-
-
+                tabla[red][kolona][i][e] = stek[k]
+                
+                k = k + 1
+                if k > len(stek) - 1:
+                    break
+                c_copy = c_copy + 1
+                if e == 2:
+                    break
+            if k > len(stek) - 1:
+                    break
+    else:
+        print("Vise od 8 figura u rezultujucem steku")
+def prazna_susedna(tabla, red, kolona):
+    if not postoje_figure(tabla, red - 1, kolona - 1) and not postoje_figure(tabla, red - 1, kolona + 1) and not postoje_figure(tabla, red + 1, kolona - 1) and not postoje_figure(tabla, red + 1, kolona + 1):
+        return True
+    return False
 def postoji_polje(n, row, col):
     if row < 0 or row > n:
         return False
@@ -199,14 +237,19 @@ if __name__ == "__main__":
 
     tabla = kreirajTablu(n)
     inicijalno_stanje(tabla, n)
-    tabla[1][1][2][1] = 'O'
-    tabla[1][1][2][2] = 'X'
+    tabla[1][1][2][1] = 'X'
+    tabla[1][1][2][2] = 'O'
     tabla[1][1][1][0] = 'X'
+    tabla[0][0][2][0] = 'X'
+    tabla[0][0][2][1] = 'O'
+    tabla[0][0][2][2] = 'X'
+    tabla[0][0][1][0] = 'O'
     prikazi_tablu(tabla, n)
     print(igrac1, igrac2)
 
     potez = unos_poteza()
     odigraj(tabla, n,potez, 1)
+    prikazi_tablu(tabla, n)
 
     
 
