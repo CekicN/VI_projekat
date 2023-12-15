@@ -109,6 +109,20 @@ def pozicija(pozicija):
 def odigraj(tabla, n, potez, igrac:Igrac):
     red = ord(potez[0]) - 65
     kolona = int(potez[1]) - 1
+
+    polje = tabla[red][kolona]
+    stek = []
+
+    if not postoje_figure(tabla, red - 1,kolona - 1) and not postoje_figure(tabla, red + 1,kolona - 1) and not postoje_figure(tabla, red - 1,kolona + 1) and not postoje_figure(tabla, red + 1,kolona + 1):
+            najblizi = najblize_polje(tabla, (red, kolona))
+            extracted_elements = [item[1] for item in najblizi]
+            while(not potez[3] in extracted_elements):
+                print("Mora da ide do najblizeg")
+                potez = unos_poteza()
+                red = ord(potez[0]) - 65
+                kolona = int(potez[1]) - 1
+                najblizi = najblize_polje(tabla, (red, kolona))
+                extracted_elements = [item[1] for item in najblizi]
     poz =  potez[2]
 
     p = pozicija(poz)
@@ -117,8 +131,6 @@ def odigraj(tabla, n, potez, igrac:Igrac):
     c_copy = c
 
     polje = tabla[red][kolona]
-    stek = []
-
     if(postoji_u_steku(tabla, red, kolona,poz) and tabla[red][kolona][r][c] == igrac.naziv):
         nadjen = False 
         for i in range(r,-1,-1):
@@ -145,23 +157,7 @@ def odigraj(tabla, n, potez, igrac:Igrac):
         elif potez[3] == 'DD':
             igraj(tabla, n, stek, red + 1, kolona + 1, vrh)
 
-def vrhSteka(red, kolona):
-    c_copy = 0
-    poz = 0
-    for i in range(2,-1,-1):
-            for j in range(3):
-                e = c_copy % 3
 
-                if(tabla[red][kolona][i][e] == '.'):
-                    break
-                else:
-                    poz = poz + 1
-                c_copy = c_copy + 1
-                if e == 2:
-                    break
-            if(tabla[red][kolona][i][e] == '.'):
-                    break
-    return poz
 def igraj(tabla, n, stek, red, kolona, vrh1):
     vrh = vrhSteka(red, kolona)
     po = pozicija(vrh)
@@ -193,11 +189,29 @@ def igraj(tabla, n, stek, red, kolona, vrh1):
             for i in range(3):
                 for j in range(3):
                     tabla[red][kolona][i][j] = '.'
-            
-         
-                    
+               
     else:
         print("Vise od 8 figura u rezultujucem steku")
+
+def vrhSteka(red, kolona):
+    c_copy = 0
+    poz = 0
+
+    for i in range(2,-1,-1):
+            for j in range(3):
+                e = c_copy % 3
+
+                if(tabla[red][kolona][i][e] == '.'):
+                    break
+                else:
+                    poz = poz + 1
+                c_copy = c_copy + 1
+                if e == 2:
+                    break
+            if(tabla[red][kolona][i][e] == '.'):
+                    break
+    return poz
+
 def prazna_susedna(tabla, red, kolona):
     if not postoje_figure(tabla, red - 1, kolona - 1) and not postoje_figure(tabla, red - 1, kolona + 1) and not postoje_figure(tabla, red + 1, kolona - 1) and not postoje_figure(tabla, red + 1, kolona + 1):
         return True
@@ -243,8 +257,61 @@ def prekini(n, igrac1:Igrac, igrac2: Igrac):
     if igrac1.poeni > broj_stekova / 2 or igrac2.poeni > broj_stekova / 2:
         return True
     return False
-
-if _name_ == "_main_":
+# def generisi_poteze(tabla, n, igrac):
+#     potezi = []
+ 
+#     for red in range(n):
+#         for kolona in range(n):
+#             if (red + kolona) % 2 == 0 and postoje_figure(tabla, red, kolona):
+#                 vrh = vrhSteka(red, kolona)
+#                 print(vrh)
+#                 for smer in ['GL', 'GD', 'DL', 'DD']:
+#                     potezi.append([chr(65 + red), kolona + 1, vrh-1, smer])
+ 
+#     validni_potezi = []
+ 
+#     for potez in potezi:
+#         try:
+#             temp_tabla = [row[:] for row in tabla]
+#             #odigraj(temp_tabla, n, potez, igrac)
+#             validni_potezi.append(potez)
+#         except Exception as e:
+#             continue
+ 
+#     return validni_potezi
+def najblize_polje(tabla, red_kolona):
+    n = len(tabla)
+    min = float('inf')
+    najblizi = []
+ 
+    for i in range(n):
+        for j in range(n):
+             if(postoje_figure(tabla,i,j)==True and (i,j) !=red_kolona):          
+                if abs(i - red_kolona[0]) == abs(j - red_kolona[1]):
+                    current_distance = abs(i - red_kolona[0]) + abs(j - red_kolona[1])
+                    if current_distance < min:
+                        min = current_distance
+                        najblizi = [((i, j), vrati_potez(red_kolona, (i, j)))]
+                    elif current_distance == min:
+                        najblizi.append(((i, j), vrati_potez(red_kolona, (i, j))))
+ 
+    return najblizi
+def vrati_potez(red_kolona, polje):
+    i, j = polje
+    k, z = red_kolona
+ 
+    # Određivanje smera kretanja
+    if i < k and j < z:
+        return "GL"
+    elif i < k and j > z:
+        return "GD"
+    elif i > k and j < z:
+        return "DL"
+    elif i > k and j > z:
+        return "DD"
+    else:
+        return "nepoznat smer"
+if __name__ == "__main__":
     print("Unesite velicinu tabele (8-16)")
     n = int(input())
 
@@ -274,6 +341,7 @@ if _name_ == "_main_":
             igrac = igrac2
         i = i + 1
         print(f"Igra: {igrac.naziv}")
+        #print(generisi_poteze(tabla,n, igrac))
         potez = unos_poteza()
         odigraj(tabla, n,potez, igrac)
         prikazi_tablu(tabla, n)
